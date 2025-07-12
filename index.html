@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPFL Focus Timer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: transparent;
+            color: #333;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 25px 30px;
+            transform: scale(0.7);
+            transform-origin: top left;
+            box-shadow: 0 3px 18px rgba(0, 0, 0, 0.08);
+            min-width: 300px;
+            text-align: center;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .logo {
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo svg {
+            height: 100%;
+            width: auto;
+            transition: transform 0.2s ease;
+        }
+        
+        .logo svg:hover {
+            transform: scale(1.05);
+        }
+        
+        .pause-btn {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 1px solid #E30613;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pause-btn:hover {
+            background: transparent;
+            transform: scale(1.05);
+        }
+        
+        .pause-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .pause-btn.paused {
+            background: transparent;
+        }
+        
+        .pause-btn.paused svg {
+            fill: white;
+        }
+        
+        .pause-btn.paused:hover {
+            background: transparent;
+        }
+        
+        .main-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #E30613;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        
+        .time-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: #333;
+            line-height: 1;
+            margin-bottom: 16px;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s ease;
+        }
+        
+        .time-display.warning {
+            color: #E30613;
+        }
+        
+        .time-display.critical {
+            color: #E30613;
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .controls {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: #E30613;
+            color: #ffffff;
+            border: none;
+            padding: 11px 20px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 80px;
+        }
+        
+        .btn:hover {
+            background: #C5050C;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(227, 6, 19, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(227, 6, 19, 0.2);
+        }
+        
+        .btn.secondary {
+            background: white;
+            color: #E30613;
+            border: 2px solid #E30613;
+        }
+        
+        .btn.secondary:hover {
+            background: transparent;
+            border-color: #C5050C;
+            color: #C5050C;
+        }
+        
+        .footer {
+            margin-top: 12px;
+            font-size: 10px;
+            color: #999;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg viewBox="0 0 60 20" xmlns="http://www.w3.org/2000/svg">
+                    <!-- EPFL Logo -->
+                    <g>
+                        <!-- E -->
+                        <path d="M2 3 L2 17 L12 17 L12 14 L5 14 L5 11 L10 11 L10 8 L5 8 L5 6 L12 6 L12 3 L2 3" fill="#E30613"/>
+                        <!-- P -->
+                        <path d="M15 3 L15 17 L18 17 L18 11 L22 11 C25 11 27 9.5 27 7.5 C27 5.5 25 3 22 3 L15 3 M18 6 L22 6 C23.5 6 24 6.5 24 7.5 C24 8.5 23.5 8 22 8 L18 8 L18 6" fill="#E30613"/>
+                        <!-- F -->
+                        <path d="M30 3 L30 17 L33 17 L33 11 L38 11 L38 8 L33 8 L33 6 L39 6 L39 3 L30 3" fill="#E30613"/>
+                        <!-- L -->
+                        <path d="M42 3 L42 17 L52 17 L52 14 L45 14 L45 3 L42 3" fill="#E30613"/>
+                    </g>
+                </svg>
+            </div>
+            <button class="pause-btn" id="pauseBtn" onclick="togglePause()">
+                <svg viewBox="0 0 24 24" id="pauseIcon">
+                    <rect x="6" y="4" width="4" height="16" />
+                    <rect x="14" y="4" width="4" height="16" />
+                </svg>
+            </button>
+        </div>
+        
+        <div class="main-label">AU BOULOT !!</div>
+        <div class="time-display" id="timeDisplay">60:00</div>
+        
+        <div class="controls">
+            <button class="btn" onclick="addTime()">+ 5 MIN</button>
+            <button class="btn secondary" onclick="removeTime()">- 5 MIN</button>
+            <button class="btn secondary" onclick="reset()">RESET</button>
+        </div>
+        
+        <div class="footer">FOCUS MODE</div>
+    </div>
+    
+    <script>
+        let timeRemaining = 60 * 60; // 60 minutes in seconds
+        let lastUpdate = Date.now();
+        let isRunning = true;
+        let isPaused = false;
+        
+        function updateDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = Math.floor(timeRemaining % 60);
+            const timeEl = document.getElementById('timeDisplay');
+            
+            // Format with support for 3 digits if over 99 minutes
+            const minStr = minutes > 99 ? minutes.toString() : minutes.toString().padStart(2, '0');
+            timeEl.textContent = `${minStr}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Adjust font size for very long times
+            if (minutes > 999) {
+                timeEl.style.fontSize = '36px';
+            } else if (minutes > 99) {
+                timeEl.style.fontSize = '42px';
+            } else {
+                timeEl.style.fontSize = '48px';
+            }
+            
+            // Update colors based on time
+            if (timeRemaining < 300) { // Less than 5 minutes
+                timeEl.className = 'time-display critical';
+            } else if (timeRemaining < 600) { // Less than 10 minutes
+                timeEl.className = 'time-display warning';
+            } else {
+                timeEl.className = 'time-display';
+            }
+        }
+        
+        function togglePause() {
+            isPaused = !isPaused;
+            const icon = document.getElementById('pauseIcon');
+            const btn = document.getElementById('pauseBtn');
+            
+            if (isPaused) {
+                // Show play icon
+                icon.innerHTML = '<path d="M8 5v14l11-7z" />';
+                btn.classList.add('paused');
+            } else {
+                // Show pause icon
+                icon.innerHTML = '<rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" />';
+                btn.classList.remove('paused');
+                lastUpdate = Date.now(); // Reset timer to avoid jump
+            }
+        }
+        
+        function addTime() {
+            timeRemaining = timeRemaining + 300; // Add 5 minutes, no cap
+            updateDisplay();
+        }
+        
+        function removeTime() {
+            timeRemaining = Math.max(0, timeRemaining - 300); // Remove 5 minutes
+            updateDisplay();
+        }
+        
+        function reset() {
+            timeRemaining = 60 * 60; // Reset to 60 minutes (can go higher)
+            isPaused = false;
+            isRunning = true;
+            lastUpdate = Date.now();
+            const icon = document.getElementById('pauseIcon');
+            const btn = document.getElementById('pauseBtn');
+            icon.innerHTML = '<rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" />';
+            btn.classList.remove('paused');
+            updateDisplay();
+        }
+        
+        function tick() {
+            if (!isRunning || timeRemaining <= 0 || isPaused) return;
+            
+            const now = Date.now();
+            const deltaTime = (now - lastUpdate) / 1000;
+            lastUpdate = now;
+            
+            timeRemaining = Math.max(0, timeRemaining - deltaTime);
+            updateDisplay();
+            
+            if (timeRemaining <= 0) {
+                isRunning = false;
+                setTimeout(() => {
+                    alert('Temps écoulé! Bon travail!');
+                }, 100);
+            }
+        }
+        
+        // Initialize
+        updateDisplay();
+        setInterval(tick, 100);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '+' || e.key === '=') addTime();
+            if (e.key === '-' || e.key === '_') removeTime();
+            if (e.key === 'r' || e.key === 'R') reset();
+            if (e.key === ' ') {
+                e.preventDefault();
+                togglePause();
+            }
+        });
+    </script>
+</body>
+</html>
